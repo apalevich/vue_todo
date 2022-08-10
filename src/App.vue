@@ -1,19 +1,20 @@
 <template>
   <div id="app">
-    {{msg}}
+    <Todos v-bind:todos="todosh" />
   </div>
 </template>
 
 <script>
+import Todos from './components/Todos.vue';
 
 export default {
   name: 'App',
   components: {
-    
+    Todos
   },
   data() {
     return {
-      todos: [
+      todosh: [
         {
            id: 1,
            title: 'Download the docs',
