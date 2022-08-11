@@ -1,12 +1,13 @@
 <template>
   <div id="app">
     <Header />
-    <AddTodo />
+    <AddTodo v-on:add-todo="AddTodo" />
     <Todos v-bind:todos="todosh" v-on:del-todo="deleteTodo" />
   </div>
 </template>
 
 <script>
+import axios from 'axios';
 import Header from './components/layout/Header.vue';
 import Todos from './components/Todos.vue';
 import AddTodo from './components/AddTodo.vue'
@@ -20,29 +21,56 @@ export default {
   },
   data() {
     return {
-      todosh: [
-        {
-           id: 1,
-           title: 'Download the docs',
-           completed: true,
-        },
-        {
-           id: 2,
-           title: 'Finish crash course',
-           completed: false,
-        },
-        {
-           id: 3,
-           title: 'Explore ecosystem',
-           completed: false,
-        }
-      ]
+      todosh: []
     }
   },
   methods: {
     deleteTodo(id) {
-      this.todosh = this.todosh.filter(todo => todo.id !== id)
+      axios.delete(`https://jsonplaceholder.typicode.com/todos/${id}`)
+      .then(res => {
+        if (res.status === 200) {
+          this.todosh = this.todosh.filter(todo => todo.id !== id)
+          console.log('Successfully deleted id:', id);
+        } else {
+          alert('Please check connection');
+        }
+      })
+      .catch(err => {
+        alert('Sorry, something is wrong');
+        console.error(err);
+      })
+    },
+    AddTodo(newTodo) {
+      console.log('New todo object:', newTodo);
+      const { title, completed } = newTodo;
+      axios.post('https://jsonplaceholder.typicode.com/todos',{
+        title,
+        completed
+      })
+      .then(res => {
+        this.todosh = [...this.todosh, res.data];
+        console.log('Successfully added to the list:', this.todosh);
+      })
+      .catch(err => {
+        alert('Sorry, something is wrong');
+        console.error(err);
+      })
     }
+  },
+  created() {
+    axios.get('https://jsonplaceholder.typicode.com/todos?_limit=4')
+    .then(res => {
+      if (res.status === 200) {
+        this.todosh = res.data;
+        console.log('Successfully loaded todos:', this.todosh);
+      } else {
+        alert('Please check connection');
+      }
+    })
+    .catch(err => {
+      alert('Sorry, something is wrong');
+      console.error(err);
+    })
   }
 }
 </script>
